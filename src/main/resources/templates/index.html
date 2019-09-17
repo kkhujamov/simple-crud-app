@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Contact</title>
+    <link rel="stylesheet" th:href="@{/assets/css/bootstrap.min.css}">
+
+</head>
+<body>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-2">
+            <div class="card">
+                <div class="card-header">
+                    Contacts
+                </div>
+                <div class="card-body">
+                    <button type="button"
+                            class="btn btn-info mb-2"
+                            id="btnOpenModal">
+                        Add
+                    </button>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Phone number</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody id="contactList">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Open Modal to add New Contacts -->
+<div class="modal fade" tabindex="-1" role="dialog" id="contactModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add contact</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <form action="" id="contactForm">
+                    <div class="form-group">
+                        <label for="name"> Name </label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Enter contact name">
+                    </div>
+                    <div class="form-group">
+                        <label for="phoneNumber"> Phone number</label>
+                        <input type="text" class="form-control" id="phoneNumber" name="phoneNumber"
+                               placeholder="Enter phone number">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="btnContactSave">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ask user to delete Contact -->
+<div class="modal fade" tabindex="-1" role="dialog" id="deleteModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Are you sure to delete this contact?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                <button type="button" class="btn btn-primary" id="btnContactDelete">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" th:src="@{/assets/js/jquery-3.4.1.min.js}"></script>
+<script type="text/javascript" th:src="@{/assets/js/popper.min.js}"></script>
+<script type="text/javascript" th:src="@{/assets/js/bootstrap.min.js}"></script>
+
+<script type="text/javascript">
+    var contactList = $("#contactList");
+    var contactForm = $("#contactForm");
+    var contactModal = $("#contactModal");
+    var isEdit = false;
+    var contactId = null;
+    getContacts();
+
+    $(document).ready(function () {
+        $("#btnContactSave").click(function () {
+            $.ajax({
+                url: isEdit ? '/contact/edit/'+contactId : '/contact/save',
+                method: 'POST',
+                data: contactForm.serialize(),
+                beforeSend: function () {
+                    $(this).attr("disabled", "disabled").text("Saving ...");
+                },
+                success: function (data) {
+                    if (data.success) {
+                        $("#contactModal").modal('toggle');
+                        contactForm[0].reset();
+                        getContacts();
+                    } else {
+                        alert(data.message);
+                    }
+                }
+            }).always(function () {
+                $(this).removeAttr("disabled").text("Save");
+            })
+        });
+
+        $("#btnContactDelete").click(function () {
+            $.ajax({
+                url: '/contact/delete/' + contactId,
+                method:'DELETE',
+                success: function (data) {
+                    if(data.success){
+                        $("#deleteModal").modal('toggle');
+                        getContacts();
+                    }
+                }
+            })
+        });
+
+        $("#btnOpenModal").click(function () {
+            isEdit = false;
+            contactModal.find('.modal-title').text('Add contact');
+            contactModal.modal('toggle');
+            contactForm[0].reset();
+        })
+    });
+
+    function getContacts() {
+        $.ajax({
+            url: '/contact/list',
+            method: 'GET',
+            beforeSend: function () {
+                contactList.empty().append("<tr>" +
+                    "<td colspan='4' class='text-center'> Loading ... </td>" +
+                    "</tr>")
+            },
+            success: function (data) {
+                contactList.empty();
+
+                var contactTable = data.map(function (contact, i) {
+                    return "<tr>" +
+                        "<td>" + (i + 1) + "</td>" +
+                        "<td>" + contact.name + "</td>" +
+                        "<td>" + contact.phoneNumber + "</td>" +
+                        "<td>" +
+                        "<button class='btn btn-warning' onclick='openEditModal(" + contact.id + ")'> Edit </button> " +
+                        "<button class='btn btn-danger' onclick='openDeleteModal("+contact.id+")'> Delete </button></td>" +
+                        "</tr>";
+                });
+
+                contactList.append(contactTable);
+            }
+        });
+    }
+    function openDeleteModal(id) {
+        $("#deleteModal").modal('toggle');
+        contactId = id;
+    }
+
+    function openEditModal(id) {
+        isEdit = true;
+        contactId = id;
+        contactModal.find('.modal-title').text('Edit contact');
+        $.ajax({
+            url: '/contact/' + id,
+            success: function (data) {
+                contactForm[0].reset();
+                $("#contactModal").modal('toggle');
+                var keys = Object.keys(data);
+                keys.forEach(function (key) {
+                    $('[name=' + key + ']').val(data[key]);
+                })
+            }
+        })
+    }
+
+</script>
+</body>
+</html>
