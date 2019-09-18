@@ -6,6 +6,7 @@ import com.restgo.demo.util.DB;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 import javax.sql.DataSource;
@@ -80,48 +81,59 @@ public class ContactService {
     }
 
     // save new Contact
-    public Result saveContact(Contact contact){
+    public Result saveContact(Contact contact, BindingResult bindingResult){
+
         Result result = new Result();
-        try {
-            connection = dataSource.getConnection();
-            statement = connection.prepareStatement(newContact);
-            statement.setString(1,contact.getName());
-            statement.setString(2,contact.getPhoneNumber());
-            statement.execute();
-            result.setMessage("Successfully Saved");
-            result.setSuccess(true);
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (bindingResult.hasErrors()){
             result.setMessage(" Error in saving contact");
             result.setSuccess(false);
-        }finally {
-            DB.done(resultSet);
-            DB.done(statement);
-            DB.done(connection);
+        }else {
+            try {
+                connection = dataSource.getConnection();
+                statement = connection.prepareStatement(newContact);
+                statement.setString(1,contact.getName());
+                statement.setString(2,contact.getPhoneNumber());
+                statement.execute();
+                result.setMessage("Successfully Saved");
+                result.setSuccess(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                result.setMessage(" Error in saving contact");
+                result.setSuccess(false);
+            }finally {
+                DB.done(resultSet);
+                DB.done(statement);
+                DB.done(connection);
+            }
         }
         return result;
     }
 
     // edit Contact
-    public Result editContact(Integer id, Contact contact){
+    public Result editContact(Integer id, Contact contact,BindingResult bindingResult){
         Result result = new Result();
-        try {
-            connection = dataSource.getConnection();
-            statement = connection.prepareStatement(updateContact);
-            statement.setString(1,contact.getName());
-            statement.setString(2,contact.getPhoneNumber());
-            statement.setInt(3,contact.getId());
-            statement.execute();
-            result.setMessage("Successfully Saved");
-            result.setSuccess(true);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            result.setMessage("Error");
+        if (bindingResult.hasErrors()){
+            result.setMessage(" Error in saving contact");
             result.setSuccess(false);
-        }finally {
-            DB.done(resultSet);
-            DB.done(statement);
-            DB.done(connection);
+        }else {
+            try {
+                connection = dataSource.getConnection();
+                statement = connection.prepareStatement(updateContact);
+                statement.setString(1,contact.getName());
+                statement.setString(2,contact.getPhoneNumber());
+                statement.setInt(3,id);
+                statement.execute();
+                result.setMessage("Successfully Saved");
+                result.setSuccess(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                result.setMessage("Error");
+                result.setSuccess(false);
+            }finally {
+                DB.done(resultSet);
+                DB.done(statement);
+                DB.done(connection);
+            }
         }
         return result;
     }
