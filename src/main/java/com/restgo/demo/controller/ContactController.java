@@ -36,8 +36,8 @@ public class ContactController {
 
     @PostMapping("/save")
     @ResponseBody
-    public Result saveContact(@RequestParam(value = "name") String name,@RequestParam(value = "phoneNumber") String number){
-        return service.saveContact(name,number);
+    public Result saveContact(@ModelAttribute Contact contact){
+        return service.saveContact(contact);
     }
 
     @PostMapping("/edit/{id}")

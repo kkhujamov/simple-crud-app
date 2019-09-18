@@ -6,6 +6,7 @@ import com.restgo.demo.util.DB;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ModelAttribute;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -79,13 +80,13 @@ public class ContactService {
     }
 
     // save new Contact
-    public Result saveContact(String name,String phoneNumber){
+    public Result saveContact(Contact contact){
         Result result = new Result();
         try {
             connection = dataSource.getConnection();
             statement = connection.prepareStatement(newContact);
-            statement.setString(1,name);
-            statement.setString(2,phoneNumber);
+            statement.setString(1,contact.getName());
+            statement.setString(2,contact.getPhoneNumber());
             statement.execute();
             result.setMessage("Successfully Saved");
             result.setSuccess(true);
