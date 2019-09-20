@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>Contact</title>
     <link rel="stylesheet" th:href="@{/assets/css/bootstrap.min.css}">
-
 </head>
 <body>
 <div class="container mt-4">
@@ -49,16 +48,17 @@
                 </button>
             </div>
             <div class="modal-body">
-
                 <form action="" id="contactForm">
                     <div class="form-group">
                         <label for="name"> Name </label>
                         <input type="text" class="form-control" id="name" name="name" placeholder="Enter contact name">
+                        <h4 class="alert-danger" style="display: none" id="validateName">Name should be between 5 and 20</h4>
                     </div>
                     <div class="form-group">
                         <label for="phoneNumber"> Phone number</label>
-                        <input type="text" class="form-control" id="phoneNumber" name="phoneNumber"
+                        <input type="number" class="form-control" id="phoneNumber" name="phoneNumber"
                                placeholder="Enter phone number">
+                        <h4 class="alert-danger" style="display: none" id="validateNumber">The number should be in this format : 998********* and length is 12</h4>
                     </div>
                 </form>
             </div>
@@ -99,31 +99,45 @@
     var contactList = $("#contactList");
     var contactForm = $("#contactForm");
     var contactModal = $("#contactModal");
+    var contactName = $("#name");
+    var contactNumber = $("#phoneNumber");
+    var validateName = $("#validateName");
+    var validateNumber = $("#validateNumber");
     var isEdit = false;
     var contactId = null;
     getContacts();
-
     $(document).ready(function () {
         $("#btnContactSave").click(function () {
-            $.ajax({
-                url: isEdit ? '/contact/edit/'+contactId : '/contact/save',
-                method: 'POST',
-                data: contactForm.serialize(),
-                beforeSend: function () {
-                    $(this).attr("disabled", "disabled").text("Saving ...");
-                },
-                success: function (data) {
-                    if (data.success) {
-                        $("#contactModal").modal('toggle');
-                        contactForm[0].reset();
-                        getContacts();
-                    } else {
-                        alert(data.message);
+            if (contactName.val().length < 5 || contactNumber.val().length != 12){
+                validateName.show(500);
+                validateNumber.show(500);
+                setTimeout(function () {
+                    validateName.hide(500);
+                    validateNumber.hide(500);
+                },4000)
+            }else {
+                $.ajax({
+                    url: isEdit ? '/contact/edit/'+contactId : '/contact/save',
+                    method: 'POST',
+                    data: contactForm.serialize(),
+                    beforeSend: function () {
+                        $(this).attr("disabled", "disabled").text("Saving ...");
+                        validateName.hide(500);
+                        validateNumber.hide(500);
+                    },
+                    success: function (data) {
+                        if (data.success) {
+                            $("#contactModal").modal('toggle');
+                            contactForm[0].reset();
+                            getContacts();
+                        } else {
+                            alert(data.message);
+                        }
                     }
-                }
-            }).always(function () {
-                $(this).removeAttr("disabled").text("Save");
-            })
+                }).always(function () {
+                    $(this).removeAttr("disabled").text("Save");
+                })
+            }
         });
 
         $("#btnContactDelete").click(function () {
@@ -163,7 +177,7 @@
                     return "<tr>" +
                         "<td>" + (i + 1) + "</td>" +
                         "<td>" + contact.name + "</td>" +
-                        "<td>" + contact.phoneNumber + "</td>" +
+                        "<td>" + "+"+ contact.phoneNumber + "</td>" +
                         "<td>" +
                         "<button class='btn btn-warning' onclick='openEditModal(" + contact.id + ")'> Edit </button> " +
                         "<button class='btn btn-danger' onclick='openDeleteModal("+contact.id+")'> Delete </button></td>" +
