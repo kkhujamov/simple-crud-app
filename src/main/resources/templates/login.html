@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Login Page</title>
+    <link rel="stylesheet" th:href="@{/assets/css/bootstrap.min.css}">
+</head>
+<body>
+<div class="container">
+    <div class="row mt-5">
+        <div class="col-md-6 offset-2">
+            <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+            <h3 class="alert-info" style="display: none" id="error"> Login or Password is wrong </h3>
+            <form id="authForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" class="form-control" name="username" placeholder="Enter username" autofocus required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" placeholder="Enter password" name="password" required>
+                </div>
+                <button type="submit" id="btnAuth" class="btn btn-primary">Send</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" th:src="@{/assets/js/jquery-3.4.1.min.js}"></script>
+<script>
+    var error = $("#error");
+    var authForm = $("#authForm");
+    var btnAuth = $("#btnAuth");
+    $(document).ready(function () {
+        btnAuth.click(function (event) {
+            event.preventDefault();
+            $.ajax({
+                url: '/login',
+                method: 'POST',
+                data: authForm.serialize(),
+                dataType: 'json',
+                success: function (data) {
+                    if (data.success){
+                        document.location = '/index';
+                    }else {
+                        alert(data.message);
+                        error.show(500);
+                    }
+                }
+            })
+        });
+    });
+</script>
+</body>
+</html>

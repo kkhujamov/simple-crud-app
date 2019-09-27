@@ -19,6 +19,11 @@
                             id="btnOpenModal">
                         Add
                     </button>
+                    <button type="button"
+                            class="btn btn-warning mb-2"
+                                id="logout">
+                        Logout
+                    </button>
                     <table class="table">
                         <thead>
                         <tr>
@@ -99,10 +104,12 @@
     var contactList = $("#contactList");
     var contactForm = $("#contactForm");
     var contactModal = $("#contactModal");
+    var deleteModal = $("#deleteModal");
     var contactName = $("#name");
     var contactNumber = $("#phoneNumber");
     var validateName = $("#validateName");
     var validateNumber = $("#validateNumber");
+    var logout = $("#logout");
     var isEdit = false;
     var contactId = null;
     getContacts();
@@ -159,6 +166,17 @@
             contactModal.modal('toggle');
             contactForm[0].reset();
         })
+        logout.click(function () {
+            if (confirm('Are you sure to logout')){
+                $.ajax({
+                    url: '/logout',
+                    method: 'post',
+                    success: function () {
+                        document.location = '/login';
+                    }
+                });
+            }
+        });
     });
 
     function getContacts() {
@@ -209,7 +227,6 @@
             }
         })
     }
-
 </script>
 </body>
 </html>

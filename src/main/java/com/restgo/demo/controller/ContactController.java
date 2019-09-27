@@ -18,12 +18,6 @@ public class ContactController {
     @Autowired
     ContactService service;
 
-    // get Home Page at http://localhost:8080/contact
-    @GetMapping()
-    public String getHomePage(){
-        return "index";
-    }
-
     @GetMapping("/list")
     @ResponseBody
     public List<Contact> getContacts(){
