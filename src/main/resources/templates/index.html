@@ -20,7 +20,7 @@
                         Add
                     </button>
                     <button type="button"
-                            class="btn btn-warning mb-2"
+                            class="btn btn-warning mb-2 float-right"
                                 id="logout">
                         Logout
                     </button>
@@ -118,8 +118,8 @@
             if (contactName.val().length < 5 || contactNumber.val().length != 12){
                 validateName.show(500);
                 validateNumber.show(500);
-                setTimeout(function () {
-                    validateName.hide(500);
+                    setTimeout(function () {
+                        validateName.hide(500);
                     validateNumber.hide(500);
                 },4000)
             }else {
@@ -165,7 +165,7 @@
             contactModal.find('.modal-title').text('Add contact');
             contactModal.modal('toggle');
             contactForm[0].reset();
-        })
+        });
         logout.click(function () {
             if (confirm('Are you sure to logout')){
                 $.ajax({

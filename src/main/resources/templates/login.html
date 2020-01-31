@@ -31,6 +31,7 @@
     var error = $("#error");
     var authForm = $("#authForm");
     var btnAuth = $("#btnAuth");
+
     $(document).ready(function () {
         btnAuth.click(function (event) {
             event.preventDefault();
@@ -43,7 +44,6 @@
                     if (data.success){
                         document.location = '/index';
                     }else {
-                        alert(data.message);
                         error.show(500);
                     }
                 }
